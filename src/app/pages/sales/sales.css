@@ -1,0 +1,14 @@
+.product-card {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.product-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+  border-color: var(--cafe-accent) !important;
+}
+
+.product-card:active {
+  transform: scale(0.98);
+}

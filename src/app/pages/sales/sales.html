@@ -1,0 +1,348 @@
+<app-navbar></app-navbar>
+<div class="container-fluid bg-light h-100 py-3">
+    <div class="row h-100">
+        <!-- ============ LEFT: Products ============ -->
+        <div class="col-md-8 d-flex flex-column">
+            <div class="card mb-3 border-0 shadow-sm">
+                <div class="card-body p-2">
+                    <input 
+                    type="text" 
+                    class="form-control" 
+                    placeholder=" Buscar producto..."
+                    [(ngModel)]="searchTerm"
+                    (ngModelChange)="onSearchChange()">
+                </div>
+            </div>
+
+            <div class="flex-grow-1 overflow-auto p-2">
+                @if (loading) {
+                    <div class="d-flex justify-content-center align-items-center h-50">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                    </div>
+                }
+                @else {
+                    <div class="row g-3">
+                        @for (product of filteredProducts; track product._id) {
+                            <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+                                <div class="card h-100 border-0 shadow-sm product-card" (click)="addToCart(product)">
+                                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 140px; overflow: hidden;">
+                                        @if (product.images && product.images.length > 0) {
+                                            <img [src]="product.images[0]" [alt]="product.name" class="img-fluid" style="object-fit: cover; height: 100%; width: 100%;">
+                                        } @else {
+                                            <i class="bi bi-cup-hot text-muted display-4"></i>
+                                        }
+                                    </div>
+                                    <div class="card-body p-2 text-center">
+                                        <h6 class="card-title text-truncate mb-1 fw-bold" [title]="product.name">{{ product.name }}</h6>
+                                        <p class="card-text text-primary fw-bold m-0">
+                                            {{ product.price | currency:'MXN':'symbol':'1.0-0' }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        @empty {
+                            <div class="col-12 text-center text-muted mt-5">
+                                <i class="bi bi-search display-1"></i>
+                                <p class="mt-3">No se encontraron productos.</p>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- ============ RIGHT: Cart OR Checkout ============ -->
+        <div class="col-md-4">
+
+            <!-- ========== VISTA 1: CARRITO ========== -->
+            @if (!showCheckout) {
+            <div class="card h-100 shadow border-0">
+                <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-cart4"></i> Orden Actual</span>
+                    <span class="badge bg-secondary">{{ cartService.itemCount() }} items</span>
+                </div>
+                
+                <div class="card-body bg-light overflow-auto p-0">
+                    @if (cartService.cartItems().length === 0) {
+                        <div class="text-center text-muted py-5">
+                            <i class="bi bi-basket display-4"></i>
+                            <p class="mt-2">Selecciona productos</p>
+                        </div>
+                    } 
+                    @else {
+                        <ul class="list-group list-group-flush">
+                            @for (item of cartService.cartItems(); track item.product._id) {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="ms-2 me-auto">
+                                        <div class="fw-bold">{{ item.product.name }}</div>
+                                        <small class="text-muted">{{ item.product.price | currency }} x {{ item.quantity }}</small>
+                                    </div>
+                                    <div class="btn-group btn-group-sm me-2">
+                                        <button class="btn btn-outline-secondary" (click)="cartService.updateQuantity(item.product._id!, item.quantity - 1)">-</button>
+                                        <button class="btn btn-outline-secondary" disabled>{{ item.quantity }}</button>
+                                        <button class="btn btn-outline-secondary" (click)="cartService.updateQuantity(item.product._id!, item.quantity + 1)">+</button>
+                                    </div>
+                                    <span class="fw-bold text-primary">{{ item.amount | currency }}</span>
+                                    <button class="btn btn-sm text-danger ms-2" (click)="cartService.removeFromCart(item.product._id!)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal:</span>
+                        <span class="fw-bold">{{ cartService.subtotal() | currency }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="h4">Total:</span>
+                        <span class="h4 text-primary">{{ cartService.total() | currency }}</span>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button 
+                            class="btn btn-primary btn-lg" 
+                            [disabled]="cartService.total() === 0 || processing"
+                            (click)="openCheckout()">
+                            <i class="bi bi-cash-coin"></i> Cobrar {{ cartService.total() | currency:'MXN':'symbol':'1.0-0' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            }
+
+            <!-- ========== VISTA 2: CHECKOUT ========== -->
+            @if (showCheckout) {
+            <div class="card h-100 shadow border-0">
+                <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                    <span>
+                        <button class="btn btn-sm btn-outline-secondary me-2" (click)="closeCheckout()">
+                            <i class="bi bi-arrow-left"></i>
+                        </button>
+                        <i class="bi bi-receipt"></i> Checkout
+                    </span>
+                </div>
+
+                <div class="card-body overflow-auto p-3">
+
+                    <!-- === Búsqueda de Cliente === -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-person-circle"></i> Cliente (opcional)
+                        </label>
+
+                        @if (!selectedCustomer) {
+                            <div class="position-relative">
+                                <input 
+                                    type="text" 
+                                    class="form-control"
+                                    placeholder="Buscar por nombre, email o teléfono..."
+                                    [(ngModel)]="customerSearch"
+                                    (ngModelChange)="onCustomerSearchChange()">
+                                
+                                <!-- Dropdown de resultados -->
+                                @if (showCustomerResults) {
+                                    <div class="list-group position-absolute w-100 shadow-sm" style="z-index: 10; max-height: 200px; overflow-y: auto;">
+                                        @for (customer of filteredCustomers; track customer._id) {
+                                            <button 
+                                                class="list-group-item list-group-item-action"
+                                                (click)="selectCustomer(customer)">
+                                                <div class="fw-bold">{{ customer.name }}</div>
+                                                <small class="text-muted">
+                                                    {{ customer.email }} · {{ customer.purchasesCount }} compras
+                                                </small>
+                                            </button>
+                                        }
+                                        @empty {
+                                            <div class="list-group-item text-muted text-center">
+                                                <small>No se encontraron clientes</small>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <small class="text-muted">Si no seleccionas cliente, se cobra sin descuento</small>
+                        }
+
+                        @if (selectedCustomer) {
+                            <div class="alert alert-success d-flex justify-content-between align-items-center py-2 mb-0">
+                                <div>
+                                    <i class="bi bi-person-check-fill"></i>
+                                    <strong>{{ selectedCustomer.name }}</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        {{ selectedCustomer.email }} · {{ selectedCustomer.purchasesCount }} compras
+                                    </small>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger" (click)="removeCustomer()">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- === Descuento (si aplica) === -->
+                    @if (discountPercent > 0) {
+                        <div class="alert alert-info py-2 mb-3">
+                            <i class="bi bi-tag-fill"></i>
+                            <strong>{{ getDiscountLabel() }}</strong> — Descuento del {{ discountPercent }}%
+                        </div>
+                    }
+
+                    <hr>
+
+                    <!-- === Resumen de Orden === -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><i class="bi bi-bag-check"></i> Resumen</label>
+                        <ul class="list-group list-group-flush">
+                            @for (item of cartService.cartItems(); track item.product._id) {
+                                <li class="list-group-item d-flex justify-content-between px-0 py-1">
+                                    <span>{{ item.product.name }} x{{ item.quantity }}</span>
+                                    <span>{{ item.amount | currency }}</span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+
+                    <hr>
+
+                    <!-- === Método de Pago === -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><i class="bi bi-credit-card"></i> Método de Pago</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="paymentMethod" id="payCash" value="cash" [(ngModel)]="selectedPaymentMethod">
+                            <label class="btn btn-outline-secondary" for="payCash">
+                                <i class="bi bi-cash"></i> Efectivo
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="paymentMethod" id="payCard" value="card" [(ngModel)]="selectedPaymentMethod">
+                            <label class="btn btn-outline-secondary" for="payCard">
+                                <i class="bi bi-credit-card"></i> Tarjeta
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="paymentMethod" id="payTransfer" value="transfer" [(ngModel)]="selectedPaymentMethod">
+                            <label class="btn btn-outline-secondary" for="payTransfer">
+                                <i class="bi bi-bank"></i> Transfer
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- === Footer: Totales y Confirmar === -->
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Subtotal:</span>
+                        <span>{{ cartService.subtotal() | currency }}</span>
+                    </div>
+
+                    @if (discountPercent > 0) {
+                        <div class="d-flex justify-content-between mb-1 text-success">
+                            <span>Descuento ({{ discountPercent }}%):</span>
+                            <span>-{{ discountAmount | currency }}</span>
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="h4">Total:</span>
+                        <span class="h4 text-primary">{{ finalTotal | currency }}</span>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button 
+                            class="btn btn-success btn-lg"
+                            [disabled]="processing"
+                            (click)="confirmSale()">
+                            @if (processing) {
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                Procesando...
+                            } @else {
+                                <i class="bi bi-check-circle"></i> Confirmar Venta {{ finalTotal | currency:'MXN':'symbol':'1.0-0' }}
+                            }
+                        </button>
+                        <button class="btn btn-outline-secondary" (click)="closeCheckout()">
+                            <i class="bi bi-arrow-left"></i> Volver al carrito
+                        </button>
+                    </div>
+                </div>
+            </div>
+            }
+
+        </div>
+    </div>
+</div>
+@if (showTicketModal && lastSale) {
+<div class="modal d-block fade show" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-receipt"></i> Ticket de Venta
+        </h5>
+        <button class="btn-close btn-close-white" (click)="showTicketModal = false"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="text-center mb-3">
+          <h4 class="fw-bold">☕ Cafecito POS</h4>
+          <small class="text-muted">{{ lastSale.saleId }}</small>
+        </div>
+
+        <hr>
+
+        <ul class="list-group list-group-flush">
+          @for (item of lastSale.items; track $index) {
+            <li class="list-group-item d-flex justify-content-between">
+              <div>
+                {{ item.productNameSnapshot }}
+                <small class="text-muted"> x{{ item.quantity }}</small>
+              </div>
+              <strong>{{ item.lineTotal | currency }}</strong>
+            </li>
+          }
+        </ul>
+
+        <hr>
+
+        <div class="d-flex justify-content-between">
+          <span>Subtotal:</span>
+          <strong>{{ lastSale.subtotal | currency }}</strong>
+        </div>
+
+        @if (lastSale.discountPercent > 0) {
+          <div class="d-flex justify-content-between text-success">
+            <span>Descuento ({{ lastSale.discountPercent }}%)</span>
+            <strong>-{{ lastSale.discountAmount | currency }}</strong>
+          </div>
+        }
+
+        <div class="d-flex justify-content-between fs-5 mt-2">
+          <span>Total:</span>
+          <strong class="text-primary">{{ lastSale.total | currency }}</strong>
+        </div>
+
+        <div class="text-center mt-3 small text-muted">
+          Gracias por tu compra ☕
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-primary w-100"
+          (click)="showTicketModal = false">
+          Cerrar Ticket
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop fade show"></div>
+}

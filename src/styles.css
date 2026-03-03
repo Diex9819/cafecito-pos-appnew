@@ -1,0 +1,53 @@
+/* src/styles.css */
+
+/* 1. Definimos la Paleta de Colores como Variables Globales */
+:root {
+  --cafe-primary: #00704A;      /* Verde café oscuro (Starbucks vibes) */
+  --cafe-secondary: #8B6F47;    /* Marrón avellana */
+  --cafe-accent: #00A86B;       /* Verde menta para hover */
+  --cafe-light: #F7F4EF;        /* Beige claro de fondo */
+  --cafe-danger: #D84315;       /* Rojo terracota para errores */
+}
+
+/* 2. Sobrescribimos las clases de Bootstrap para que usen nuestra paleta */
+
+/* Fondo general */
+.bg-light {
+  background-color: var(--cafe-light) !important;
+}
+
+/* Textos principales */
+.text-primary, h2.text-primary {
+  color: var(--cafe-primary) !important;
+}   
+
+/* Botones Principales */
+.btn-primary {
+  background-color: var(--cafe-primary) !important;
+  border-color: var(--cafe-primary) !important;
+  color: white !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--cafe-accent) !important;
+  border-color: var(--cafe-accent) !important;
+}
+
+.btn-primary:disabled {
+  background-color: var(--cafe-secondary) !important;
+  border-color: var(--cafe-secondary) !important;
+  opacity: 0.7;
+}
+
+/* Alertas de Error */
+.alert-danger {
+  background-color: #ffe5db; /* Un tono muy suave del rojo */
+  border-color: var(--cafe-danger);
+  color: var(--cafe-danger);
+}
+
+/* Tarjetas (Borde café elegante) */
+.card {
+  background-color: #FFFFFF;
+  border: 1px solid var(--cafe-secondary); /* Bajé a 1px para ser más sutil, o 2px si prefieres */
+}

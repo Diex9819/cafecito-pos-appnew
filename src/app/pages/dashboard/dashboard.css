@@ -1,0 +1,141 @@
+/* ===== FONDO GENERAL ===== */
+.container-fluid {
+  background: linear-gradient(180deg, #f8f9fa 0%, #eef1f4 100%);
+}
+
+/* ===== CARDS ===== */
+.card {
+  border-radius: 16px;
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+}
+
+/* ===== CARDS STATS ===== */
+.card-body .rounded-circle {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* ===== NAV TABS ===== */
+.nav-tabs .nav-link {
+  border: none;
+  color: #6c757d;
+  padding: 14px 20px;
+  font-weight: 500;
+}
+
+.nav-tabs .nav-link.active {
+  background: #fff;
+  color: var(--cafe-primary);
+  border-bottom: 3px solid var(--cafe-primary);
+}
+
+/* ===== TABLA PRO ===== */
+.table {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.table thead {
+  background: #f8f9fa;
+}
+
+.table-hover tbody tr:hover {
+  background: #f1f3f5;
+}
+
+/* ===== BADGES ===== */
+.badge {
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+/* ===== BOTONES ===== */
+.btn {
+  border-radius: 10px;
+}
+
+/* ===== MODALES ===== */
+.modal-content {
+  border-radius: 16px;
+  border: none;
+}
+
+.modal-header {
+  border-bottom: 1px solid #eee;
+}
+
+/* ===== CLICKABLE SALES ===== */
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* ===== SOMBRA PRO ===== */
+.shadow-sm {
+  box-shadow: 0 8px 25px rgba(0,0,0,0.06) !important;
+}
+
+/* ========================= */
+/*  FORMULARIO PRODUCTO PRO  */
+/* ========================= */
+
+/* Body del modal más limpio */
+.modal-body {
+  background: #ffffff;
+  padding: 2rem;
+}
+
+/* Inputs estilo moderno */
+.modal-body .form-control,
+.modal-body .form-select,
+.modal-body textarea {
+  border: 1.5px solid #e3e6ea;
+  border-radius: 12px;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  background: #f9fafb;
+}
+
+/* Efecto focus elegante */
+.modal-body .form-control:focus,
+.modal-body .form-select:focus,
+.modal-body textarea:focus {
+  background: #ffffff;
+  border-color: #212529;
+  box-shadow: 0 0 0 3px rgba(33, 37, 41, 0.1);
+}
+
+/* Labels más finos */
+.modal-body .form-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #495057;
+  margin-bottom: 6px;
+}
+
+/* Footer más limpio */
+.modal-footer {
+  background: #ffffff;
+  border-top: 1px solid #f1f1f1;
+  padding: 1rem 2rem;
+}
+
+/* Botón guardar más elegante */
+.modal-footer .btn-dark {
+  padding: 0.5rem 1.4rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.modal-footer .btn-dark:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+/* Separación vertical más bonita */
+.modal-body .mb-3 {
+  margin-bottom: 1.2rem !important;
+}

@@ -1,0 +1,606 @@
+<app-navbar></app-navbar>
+
+<div class="container-fluid py-4 bg-body-tertiary min-vh-100">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-0">Dashboard</h3>
+            <small class="text-muted">Panel administrativo Cafecito POS</small>
+        </div>
+        <span class="badge bg-dark px-3 py-2">Sistema POS</span>
+    </div>
+
+    <!-- ================= STATS ================= -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted">Productos</small>
+                        <h4 class="fw-bold mb-0">{{ products.length }}</h4>
+                    </div>
+                    <div class="bg-primary text-white rounded-3 p-3">
+                        <i class="bi bi-box-seam fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted">Stock Bajo</small>
+                        <h4 class="fw-bold mb-0">{{ lowStockCount }}</h4>
+                    </div>
+                    <div class="bg-warning text-dark rounded-3 p-3">
+                        <i class="bi bi-exclamation-triangle fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted">Clientes</small>
+                        <h4 class="fw-bold mb-0">{{ customers.length }}</h4>
+                    </div>
+                    <div class="bg-success text-white rounded-3 p-3">
+                        <i class="bi bi-people fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted">Ingresos</small>
+                        <h4 class="fw-bold mb-0">
+                            {{ totalRevenue | currency:'MXN':'symbol':'1.0-0' }}
+                        </h4>
+                    </div>
+                    <div class="bg-dark text-white rounded-3 p-3">
+                        <i class="bi bi-graph-up fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= MAIN CARD ================= -->
+    <div class="card border-0 shadow-sm">
+
+        <!-- TABS HEADER -->
+        <div class="card-header bg-white border-0 pt-3 pb-0">
+            <ul class="nav nav-pills gap-2">
+
+                <li class="nav-item">
+                    <button class="nav-link"
+                        [class.active]="activeTab === 'inventory'"
+                        (click)="activeTab='inventory'">
+                        <i class="bi bi-box-seam me-1"></i> Inventario
+                    </button>
+                </li>
+
+                <li class="nav-item">
+                    <button class="nav-link"
+                        [class.active]="activeTab === 'customers'"
+                        (click)="activeTab='customers'">
+                        <i class="bi bi-people me-1"></i> Clientes
+                    </button>
+                </li>
+
+                <li class="nav-item">
+                    <button class="nav-link"
+                        [class.active]="activeTab === 'users'"
+                        (click)="activeTab='users'">
+                        <i class="bi bi-person-gear me-1"></i> Personal
+                    </button>
+                </li>
+
+                <li class="nav-item">
+                    <button class="nav-link"
+                        [class.active]="activeTab === 'sales'"
+                        (click)="activeTab='sales'">
+                        <i class="bi bi-receipt me-1"></i> Ventas
+                    </button>
+                </li>
+
+            </ul>
+        </div>
+
+        <div class="card-body">
+
+            <!-- ================= INVENTARIO ================= -->
+            @if (activeTab === 'inventory') {
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0">Gestión de Productos</h5>
+                <button class="btn btn-dark px-4" (click)="openProductModal()">
+                    <i class="bi bi-plus-lg"></i> Nuevo
+                </button>
+            </div>
+
+            @if (loadingProducts) {
+            <div class="text-center py-5">
+                <div class="spinner-border"></div>
+            </div>
+            } @else {
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Producto</th>
+                            <th>Categoría</th>
+                            <th class="text-end">Precio</th>
+                            <th class="text-center">Stock</th>
+                            <th class="text-center">Estado</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @for (product of products; track product._id) {
+                        <tr>
+
+                            <td>
+                                <div class="fw-semibold">{{ product.name }}</div>
+                                <small class="text-muted">{{ product.description }}</small>
+                            </td>
+
+                            <td>
+                                <span class="badge text-bg-light">
+                                    {{ product.category }}
+                                </span>
+                            </td>
+
+                            <td class="text-end fw-semibold">
+                                {{ product.price | currency:'MXN' }}
+                            </td>
+
+                            <td class="text-center">
+                                <span class="badge" [class]="getStockClass(product.stock)">
+                                    {{ product.stock }}
+                                </span>
+                            </td>
+
+                            <td class="text-center">
+                                <span class="badge"
+                                    [class]="product.isActive !== false ? 'text-bg-success' : 'text-bg-danger'">
+                                    {{ product.isActive !== false ? 'Activo' : 'Inactivo' }}
+                                </span>
+                            </td>
+
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-dark"
+        (click)="openProductModal(product)">
+        <i class="bi bi-pencil"></i>
+    </button>
+
+                                    <button class="btn"
+        [class]="product.isActive !== false ? 'btn-outline-warning' : 'btn-outline-success'"
+        (click)="confirmToggleProduct(product)">
+        <i class="bi"
+            [class]="product.isActive !== false ? 'bi-eye-slash' : 'bi-eye'"></i>
+    </button>
+                                </div>
+                            </td>
+
+                        </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+
+            }
+            }
+
+            <!-- ================= CLIENTES ================= -->
+            @if (activeTab === 'customers') {
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0">Clientes</h5>
+                <button class="btn btn-dark px-4" (click)="openCustomerModal()">
+                    <i class="bi bi-person-plus"></i> Nuevo
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Cliente</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th class="text-center">Compras</th>
+                            <th class="text-center">Nivel</th>
+                            <th class="text-center">Descuento</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @for (customer of customers; track customer._id; let i = $index) {
+                        <tr>
+
+                            <td>{{ i + 1 }}</td>
+                            <td class="fw-semibold">{{ customer.name }}</td>
+                            <td>{{ customer.email }}</td>
+                            <td>{{ customer.phone || '—' }}</td>
+
+                            <td class="text-center fw-bold">
+                                {{ customer.purchasesCount }}
+                            </td>
+
+                            <td class="text-center">
+                                <span class="badge"
+                                    [class]="getCustomerTier(customer.purchasesCount).badge">
+                                    {{ getCustomerTier(customer.purchasesCount).label }}
+                                </span>
+                            </td>
+
+                            <td class="text-center text-success fw-bold">
+                                {{ getDiscountForCount(customer.purchasesCount) }}%
+                            </td>
+
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-dark"
+                                        (click)="openCustomerModal(customer)">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+
+                                    <button class="btn btn-outline-danger"
+                                        (click)="deleteCustomer(customer)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+
+                        </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+
+            }
+            @if (showCustomerModal) {
+
+<div class="modal-backdrop fade show"></div>
+
+<div class="modal d-block">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ editingCustomerId ? 'Editar Cliente' : 'Nuevo Cliente' }}
+        </h5>
+        <button class="btn-close" (click)="closeCustomerModal()"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="mb-3">
+          <label class="form-label">Nombre</label>
+          <input class="form-control"
+                 [(ngModel)]="customerForm.name">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email"
+                 class="form-control"
+                 [(ngModel)]="customerForm.email">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Teléfono</label>
+          <input class="form-control"
+                 [(ngModel)]="customerForm.phone">
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary"
+                (click)="closeCustomerModal()">
+          Cancelar
+        </button>
+
+        <button class="btn btn-dark"
+                (click)="saveCustomer()">
+          {{ editingCustomerId ? 'Actualizar' : 'Guardar' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+}
+
+            <!-- ================= USERS ================= -->
+            @if (activeTab === 'users') {
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0">Personal</h5>
+                <button class="btn btn-dark px-4" (click)="openUserModal()">
+                    <i class="bi bi-person-plus"></i> Nuevo
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th class="text-center">Rol</th>
+                            <th class="text-center">Registro</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @for (user of users; track user._id) {
+                        <tr>
+
+                            <td class="fw-semibold">{{ user.name }}</td>
+                            <td>{{ user.email }}</td>
+
+                            <td class="text-center">
+                                <span class="badge"
+                                    [class]="user.role === 'admin' ? 'text-bg-warning' : 'text-bg-info'">
+                                    {{ user.role }}
+                                </span>
+                            </td>
+
+                            <td class="text-center text-muted">
+                                {{ user.createdAt | date:'dd/MM/yyyy' }}
+                            </td>
+
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-dark"
+                                        (click)="openUserModal(user)">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+
+                                    <button class="btn btn-outline-danger"
+                                        (click)="deleteUser(user)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+
+                        </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+
+            }
+            @if (showUserModal) {
+
+<div class="modal-backdrop fade show"></div>
+
+<div class="modal d-block">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ editingUserId ? 'Editar Usuario' : 'Nuevo Usuario' }}
+        </h5>
+        <button class="btn-close" (click)="closeUserModal()"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="mb-3">
+          <label class="form-label">Nombre</label>
+          <input class="form-control"
+                 [(ngModel)]="userForm.name">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email"
+                 class="form-control"
+                 [(ngModel)]="userForm.email">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Contraseña</label>
+          <input type="password"
+                 class="form-control"
+                 [(ngModel)]="userForm.password">
+          <small class="text-muted">
+            Déjalo vacío si no deseas cambiarla
+          </small>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Rol</label>
+          <select class="form-select"
+                  [(ngModel)]="userForm.role">
+            <option value="admin">Admin</option>
+            <option value="cajero">Cajero</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary"
+                (click)="closeUserModal()">
+          Cancelar
+        </button>
+
+        <button class="btn btn-dark"
+                (click)="saveUser()">
+          {{ editingUserId ? 'Actualizar' : 'Guardar' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+}
+
+            <!-- ================= SALES ================= -->
+            @if (activeTab === 'sales') {
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0">Historial de Ventas</h5>
+                <span class="text-muted">{{ sales.length }} registros</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Cliente</th>
+                            <th class="text-center">Items</th>
+                            <th class="text-end">Total</th>
+                            <th class="text-center">Fecha</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @for (sale of sales; track sale._id) {
+                        <tr class="cursor-pointer" (click)="toggleSaleDetail(sale)">
+                            <td><code>{{ sale.saleId }}</code></td>
+
+                            <td>
+                                {{ sale.customerId?.name || 'Público general' }}
+                            </td>
+
+                            <td class="text-center">
+                                <span class="badge text-bg-secondary">
+                                    {{ sale.items.length }}
+                                </span>
+                            </td>
+
+                            <td class="text-end fw-bold">
+                                {{ sale.total | currency }}
+                            </td>
+
+                            <td class="text-center text-muted">
+                                {{ sale.createdAt | date:'dd/MM/yy HH:mm' }}
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+
+            }
+
+        </div>
+    </div>
+</div>
+@if (showProductModal) {
+
+<div class="modal-backdrop fade show"></div>
+
+<div class="modal d-block" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <!-- HEADER -->
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ editingProductId ? 'Editar Producto' : 'Nuevo Producto' }}
+        </h5>
+
+        <button class="btn-close" (click)="closeProductModal()"></button>
+      </div>
+
+      <!-- BODY -->
+      <div class="modal-body">
+
+        <div class="mb-3">
+          <label class="form-label">Nombre</label>
+          <input class="form-control"
+                 [(ngModel)]="productForm.name">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Precio</label>
+          <input type="number"
+                 class="form-control"
+                 [(ngModel)]="productForm.price">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Stock</label>
+          <input type="number"
+                 class="form-control"
+                 [(ngModel)]="productForm.stock">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Categoría</label>
+          <select class="form-select"
+                  [(ngModel)]="productForm.category">
+            @for (cat of categories; track cat) {
+              <option [value]="cat">{{ cat }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Descripción</label>
+          <textarea class="form-control"
+                    [(ngModel)]="productForm.description">
+          </textarea>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Imágenes (URLs separadas por coma)</label>
+          <input class="form-control"
+                 [(ngModel)]="productForm.images">
+        </div>
+
+      </div>
+
+      <!-- FOOTER -->
+      <div class="modal-footer">
+        <button class="btn btn-secondary"
+                (click)="closeProductModal()">
+          Cancelar
+        </button>
+
+        <button class="btn btn-dark"
+                (click)="saveProduct()">
+          {{ editingProductId ? 'Actualizar' : 'Guardar' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+}

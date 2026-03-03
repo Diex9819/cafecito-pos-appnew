@@ -1,0 +1,83 @@
+<nav class="navbar navbar-expand-lg shadow-sm" style="background: linear-gradient(135deg, var(--cafe-primary), #3e2723);">
+
+  <div class="container-fluid">
+
+    <!-- Logo / Marca -->
+    <a class="navbar-brand fw-bold text-white" routerLink="/sales">
+      <i class="bi bi-cup-hot-fill me-2"></i>
+      Cafecito POS
+    </a>
+
+    <!-- Botón móvil -->
+    <button
+      class="navbar-toggler border-0"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+
+      <!-- Menú -->
+      <ul class="navbar-nav me-auto">
+
+        <li class="nav-item">
+          <a
+            class="nav-link text-white opacity-75 fw-semibold"
+            routerLink="/sales"
+            routerLinkActive="active fw-bold opacity-100"
+          >
+            <i class="bi bi-shop me-1"></i>
+            Ventas
+          </a>
+        </li>
+
+        @if (isAdmin) {
+          <li class="nav-item">
+            <a
+              class="nav-link text-white opacity-75 fw-semibold"
+              routerLink="/dashboard"
+              routerLinkActive="active fw-bold opacity-100"
+            >
+              <i class="bi bi-speedometer2 me-1"></i>
+              Dashboard
+            </a>
+          </li>
+        }
+
+      </ul>
+
+      <!-- Usuario -->
+      <div class="d-flex align-items-center gap-3">
+
+        <div class="text-white small d-flex align-items-center">
+          <i class="bi bi-person-circle fs-5 me-2"></i>
+
+          <div class="d-flex flex-column lh-1">
+            <strong>{{ userName }}</strong>
+
+            <span
+              class="badge mt-1"
+              [class]="isAdmin ? 'bg-warning text-dark' : 'bg-info text-dark'"
+            >
+              {{ userRole }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Logout -->
+        <button
+          class="btn btn-light btn-sm fw-semibold px-3"
+          (click)="logout()"
+        >
+          <i class="bi bi-box-arrow-right me-1"></i>
+          Salir
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+</nav>
